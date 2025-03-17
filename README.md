@@ -31,7 +31,7 @@ This tool is intended for **educational and research purposes only**. The author
 Before using GramRipper, ensure you have the following:
 
 ### Prerequisites
-1. **Python 3.8 or higher** installed on your system.
+1. **Python 3.x or higher** installed on your system.
 2. A **Telegram account** with a phone number for authentication.
 3. **API_ID** and **API_HASH** from [my.telegram.org](https://my.telegram.org/apps).
 4. A **Telegram bot token** (optional, if you want to interact with bots).
