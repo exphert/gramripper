@@ -1,12 +1,6 @@
-
+import re, sys, os, json
 import datetime
-import re
-import sys
 import requests
-import json
-import os
-import time
-import uuid
 from dotenv import load_dotenv
 from telethon.sync import TelegramClient
 from telethon.errors import SessionPasswordNeededError
