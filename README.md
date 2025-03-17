@@ -111,4 +111,4 @@ This project is licensed under the MIT License. See the [LICENSE](https://licens
 If you find this tool useful, consider giving it a ⭐ on GitHub. For questions or issues, please open an issue on the repository.
 
 ## Authors
-- [@exphert](https://github.com/exphert) - Just Coding
+- [@exphert](https://github.com/exphert)
