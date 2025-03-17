@@ -23,7 +23,7 @@ MGA = Fore.MAGENTA
 CYN = Fore.CYAN
 
 ok = f"{RST}[{CYN}+{RST}]"
-info = f"{RST}[{BLU}i{RST}]"
+info = f"{RST}[{MGA}info{RST}]"
 success = f"{RST}[{GRN}✓{RST}]"
 warning = f"{RST}[{YLW}-{RST}]"
 error = f"{RST}[{RED}!{RST}]"
@@ -55,21 +55,62 @@ def color(string, color, wrap=None):
     return f"{RST}{color}{string}{RST}" if not wrap else wrap.replace("STR", f"{RST}{color}{string}{RST}")
 
 
-def generate_box(lines, length=78):
+def generate_box(lines, length=78, title="", titleclr=Fore.YELLOW, pos="center", loc="top"):
     output = []
-    undifined = True if length == -1 else False
-    length = 40 if length == -1 else length
+    undefined = (length == -1)
+    length = 40 if undefined else length  # Default to 40 if undefined
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    output.append(
-        color(f"┌{'─' * (length - 2)}{'┐' if not undifined else "»"}", DIM))
-    for l in lines:
-        length_content = len(ansi_escape.sub('', l))
-        output.append(
-            f"{color('│', DIM)} {l}{' ' * ((length - length_content) - 3)}{color('│' if not undifined else "", DIM)}")
-    output.append(
-        color(f"└{'─' * (length - 2)}{'┘' if not undifined else "»"}", DIM))
-    return "\n".join(output)  # Return the formatted box
 
+    # Helper function to generate the title bar
+    def title_bar(start, end, title, length, titleclr, pos, undefined):
+        title_length = len(title) + 2  # Account for brackets []
+        content_length = length - 2
+        wrap_left = color("[", RST) if title else color('─', DIM)
+        wrap_right = color("]", RST) if title else color('─', DIM)
+
+        if pos == "center":
+            pad = (content_length - title_length) // 2
+            return f"{start}{'─' * pad}{wrap_left}{color(title, titleclr)}{wrap_right}{color(f"{'─' * pad}{end if not undefined else '»'}", DIM)}"
+
+        elif pos == "right":
+            pad = (content_length - title_length) - 1
+            return f"{start}{'─' * pad}{wrap_left}{color(title, titleclr)}{wrap_right}{color(f"{end if not undefined else '─»'}", DIM)}"
+
+        else:  # Default to "left"
+            return f"{start}{wrap_left}{color(title, titleclr)}{wrap_right}{color(f"{'─' * (content_length - title_length)}{end if not undefined else '»'}", DIM)}"
+
+    # Top Border
+    if loc == "top":
+        output.append(color(title_bar("┌", "┐", title, length, titleclr, pos, undefined), DIM))
+    else:
+        output.append(color(f"┌{'─' * (length - 2)}{'┐' if not undefined else '»'}", DIM))
+
+    # Content
+    for line in lines:
+        line_length = len(ansi_escape.sub('', line))  # Strip ANSI escape sequences
+        padding = length - line_length - 3  # Adjust padding
+        output.append(f"{color('│', DIM)} {line}{' ' * padding}{color('│' if not undefined else '', DIM)}")
+
+    # Bottom Border
+    if loc == "bottom":
+        output.append(color(title_bar("└", "┘", title, length, titleclr, pos, undefined), DIM))
+    else:
+        output.append(color(f"└{'─' * (length - 2)}{'┘' if not undefined else '»'}", DIM))
+
+    return "\n".join(output)
+
+def prompt(title, titleclr=Fore.CYAN, pos='left', before=""):
+    lgth = (18 - (len(title) // 2))  # Adjusted calculation
+    contentLen = (38 - len(f"[{title}]"))
+    match (pos):
+        case 'center':
+            return f"{color(f'{before}┌{'─' * lgth}', DIM)}[{color(title, titleclr)}]{color(f"{'─' * lgth}»", DIM)}\n{color('└──', DIM)}{Fore.YELLOW}» "
+
+        case 'rigth':
+            return f"{color(f'{before}┌{'─' * (contentLen - 1)}', DIM)}[{color(title, titleclr)}]{color('─»', DIM)}\n{color('└──', DIM)}{Fore.YELLOW}» "
+
+        case 'left' | _:
+            return f"{color(f'{before}┌─', DIM)}[{color(title, titleclr)}]{color(f"{'─' * (contentLen - 1)}»", DIM)}\n{color('└──', DIM)}{Fore.YELLOW}» "
 
 # Function to check if Telethon is authenticated
 def is_telethon_authenticated():
@@ -78,6 +119,7 @@ def is_telethon_authenticated():
 
 def get_session_filepath(bot_token, from_chat_id):
     """Returns the session file path for a specific bot session."""
+    bot_token = parse_bot_token(bot_token)
     return os.path.join(SESSION_DIR, f"{bot_token.replace(':', '+')}_{from_chat_id}.json")
 
 
@@ -133,7 +175,7 @@ def init():
                     try:
                         client.sign_in(phone, code)
                     except SessionPasswordNeededError:
-                        password = input("🔑 Enter your 2FA password: ")
+                        password = input(f"{ok} Enter your 2FA password: ")
                         client.sign_in(password=password)
 
                     print(f"{success} Login successful! Telethon session saved.")
@@ -151,7 +193,7 @@ def init():
         envs.append(f"API_ID = {inputs}")
         inputs = input("Enter Telegram API_HASH: ")
         envs.append(f"API_HASH = {inputs}")
-        inputs = input("Enter Your Chat ID: ")
+        inputs = input("Enter The Receiver Chat ID: ")
         envs.append(f"TO_CHAT_ID = {inputs}")
 
         with open(ENV_FILE, "w") as f:
@@ -186,6 +228,7 @@ def parse_bot_token(raw_token):
 
 def telethon_send_start(bot_token):
     global TELETHON_SESSION, API_ID, API_HASH
+    bot_token = parse_bot_token(bot_token)
 
     with TelegramClient(TELETHON_SESSION, API_ID, API_HASH) as client:
         client.connect()
@@ -211,11 +254,14 @@ def telethon_send_start(bot_token):
 
 
 # Function to check if bot is online using /getMe
-def is_bot_online(bot_token):
+def is_bot_online(bot_token, returnType='filter'):
+    bot_token = parse_bot_token(bot_token)
     url = f"{TELEGRAM_API_URL}{bot_token}/getMe"
     try:
         r = requests.get(url)
         data = r.json()
+        if returnType == 'raw':
+            return data
         if data.get("ok", False):
             return data["result"]
         else:
@@ -225,8 +271,62 @@ def is_bot_online(bot_token):
         print(f"{error} Error checking bot status: {e}")
         return None
 
-# Function to show available sessions
+def get_bot_owner(bot_token, chat_id, returnType='filter'):
+    bot_token = parse_bot_token(bot_token)
+    url = f"{TELEGRAM_API_URL}{bot_token}/getChat?chat_id={chat_id}"
+    r = requests.get(url)
+    data = r.json()
 
+    if returnType == 'raw':
+        return data
+
+    if data.get("ok", False):
+        return {
+            "first": data["result"].get("first_name", "Unknown"),
+            "last": data["result"].get("last_name", ""),
+            "type": data["result"].get("type", "Unknown")
+        }
+    else:
+        return {
+            "first": "Unknown",
+            "last": "",
+            "type": "Unknown"
+        }
+
+
+def checkbot():
+    banner()
+    print(generate_box([], -1, "Check Bot Status", titleclr=GRN))
+    bot_token = ""
+    try:
+        while not bot_token:
+            bot_token = input(prompt('Bot Token'))
+        print("")
+    except KeyboardInterrupt:
+        return
+
+    data = is_bot_online(bot_token, returnType='raw')
+    print(f"\n{Style.RESET_ALL}{json.dumps(data, indent=4)}")
+    input("\nPress ENTER to continue...")
+
+def checkbot_chatid():
+    banner()
+    print(generate_box([], -1, "Check Bot Chat ID Status", titleclr=GRN))
+    bot_token = ""
+    from_chat_id = ""
+    try:
+        while not bot_token:
+            bot_token = input(prompt('Bot Token'))
+        print("")
+        while not from_chat_id:
+            from_chat_id = input(prompt('Bot Chat ID'))
+        print("")
+    except KeyboardInterrupt:
+        return
+
+    data = get_bot_owner(bot_token, from_chat_id, returnType='raw')
+    print(f"\n{Style.RESET_ALL}{json.dumps(data, indent=4)}")
+    input("\nPress ENTER to continue...")
 
 def show_sessions():
     """Displays available session files."""
@@ -235,12 +335,12 @@ def show_sessions():
     available_sessions = [
         k for k in sessions.keys() if not sessions[k].get("is_done")]
 
-    # if not available_sessions:
-    #     input(f"{warning} No active sessions found.")
-    #     return
+    if not available_sessions:
+        input(f"{warning} No active sessions found.")
+        return
 
     print(generate_box(
-        [f"{ok} Available Sessions: {color(len(available_sessions), YLW)}"], -1))
+        [f"{ok} Available Sessions: {color(len(available_sessions), YLW)}"], -1, title='Info', titleclr=MGA, pos='left'))
     lists = []
     for idx, filename in enumerate(available_sessions, start=1):
         session_data = sessions[filename]
@@ -248,7 +348,7 @@ def show_sessions():
             f"@{session_data['username']}", CYN)}) [Dumped: {color(session_data['last_message_id'], YLW)}/{color(session_data['last_updated_message_id'], GRN)}]")
     lists.append(f"{color("U", GRN, f"{DIM}[STR{DIM}]{RST}")} Update Session")
     lists.append(f"{color("ENTER", CYN, f"{DIM}[STR{DIM}]{RST}")} Back/Cancel")
-    print(generate_box(lists, -1))
+    print(generate_box(lists, -1, title='List Session', pos='left'))
     choice = input(prompt('Select Session'))
     print("")
     if choice.isdigit():
@@ -273,24 +373,21 @@ def show_sessions():
         input("\nAll Session Updated!. Press ENTER to continue...")
         show_sessions()
 
-
-def checkbot():
-    banner()
-    bot_token = input(prompt('Bot Token'))
-    url = f"{TELEGRAM_API_URL}{parse_bot_token(bot_token)}/getMe"
-    r = requests.get(url)
-    data = r.json()
-    print(f"\n{Style.RESET_ALL}{json.dumps(data, indent=4)}")
-    input("\nPress ENTER to continue...")
-
-# Function to start a new dumper session
-
-
 def new_dumper():
     banner()
-    bot_token = input(prompt('Bot Token'))
-    from_chat_id = input(prompt('Bot Chat ID', before="\n"))
-    print("")
+    print(generate_box([], -1, "New Ripper", titleclr=GRN))
+    bot_token = ""
+    from_chat_id = ""
+
+    try:
+        while not bot_token:
+            bot_token = input(prompt('Bot Token'))
+        print("")
+        while not from_chat_id:
+            from_chat_id = input(prompt('Bot Chat ID'))
+        print("")
+    except KeyboardInterrupt:
+        return
 
     bot_info = is_bot_online(parse_bot_token(bot_token))
     if not bot_info:
@@ -316,8 +413,9 @@ def new_dumper():
     last_updated_message_id = get_last_message_id(bot_token)
 
     session = {
-        "bot_token": bot_token,
+        "bot_token": parse_bot_token(bot_token),
         "from_chat_id": from_chat_id,
+        "bot_owner": get_bot_owner(bot_token, from_chat_id),
         "last_message_id": last_message_id,
         "last_updated_message_id": last_updated_message_id,
         "username": bot_username,
@@ -332,6 +430,7 @@ def new_dumper():
 
 
 def get_last_message_id(bot_token):
+    bot_token = parse_bot_token(bot_token)
     telethon_send_start(bot_token)  # dont remove this !!!
     url = f"{TELEGRAM_API_URL}{bot_token}/getUpdates"
     response = requests.get(url)
@@ -346,24 +445,35 @@ def get_last_message_id(bot_token):
 
     return 1  # Default if no valid messages found
 
-# Function to continue an existing session
-
 
 def continue_dumper(session):
+    print("")
+    print(generate_box(
+        [f"{ok} Bot Name: {color(session["first_name"], YLW)}", f"{ok} Username: {color(f"@{session["username"]}", CYN)}", f"{ok} Message : {color(session["last_updated_message_id"], GRN)} - Available messages detected"], -1, title='Bot Info', titleclr=MGA, pos='left'))
+
+    start_from_message_id = input(prompt("Start From Message ID (Default if empty)", before="\n"))
+    print("")
+    if not start_from_message_id.isdigit() or not start_from_message_id:
+        print(f"{info} Skipped. Defaulting to {session["last_message_id"]}.")
+        start_from_message_id = session["last_message_id"]
+    else:
+        start_from_message_id = int(start_from_message_id)
+
     bot_token = session["bot_token"]
     from_chat_id = session["from_chat_id"]
-    last_message_id = session["last_message_id"]
+    last_message_id = start_from_message_id
     last_updated_message_id = session["last_updated_message_id"]
+    bot_owner = f"User: {color(" ".join([session["bot_owner"]["first"], session["bot_owner"]["last"]]), CYN)} Type: {color(session["bot_owner"]["type"], RED if session["bot_owner"]["type"].lower() == 'private' else GRN)}"
 
-    print(f"{info} Dumping messages from {from_chat_id} (starting at {last_message_id})...\n")
+    print(f"{info} Dumping messages from {color(from_chat_id, GRN)} ({bot_owner})")
+    print(f"{info} Dumping (starting at {color(last_message_id, YLW)})...\n")
 
     forward_success = 0
     forward_failed = 0
 
     try:
         while last_message_id <= last_updated_message_id:
-            forward = forward_msg(bot_token, from_chat_id,
-                                  TO_CHAT_ID, last_message_id)
+            forward = forward_msg(bot_token, from_chat_id, TO_CHAT_ID, last_message_id)
             success = forward.get("ok", False)
             current_time = datetime.datetime.now().strftime("%H:%M:%S")  # Get current time
 
@@ -424,28 +534,9 @@ def banner():
 {color("|| |''|| '||''|  '''|.  '||),,(||'", CYN)} {color(" ||...|'  ||  '||''|, '||''|, .|''|, '||''|", RED)}
 {color("||    ||  ||    .|''||   || || ||", CYN)}  {color(" || \\\\    ||   ||  ||  ||  || ||..||  ||", RED)}
 {color("`|....|' .||.   `|..||. .||    ||.", CYN)} {color(".||  \\\\. .||.  ||..|'  ||..|' `|...  .||.", RED)}
-                                                  {color("||      ||", RED)}
-            {color("github.com/exphert/gramripper", YLW)}        {color(".||     .||", RED)}      {color("v1.0", CYN)}
+    {color("By @Exphert", RED)}                                   {color("||      ||", RED)}
+            {color("github.com/exphert/gramripper", YLW)}        {color(".||     .||", RED)}      {color("v1.1", CYN)}
 """)
-
-
-def prompt(title, titleclr=Fore.CYAN, pos='left', before=""):
-    lgth = (18 - (len(title) // 2))  # Adjusted calculation
-    contentLen = (38 - len(f"[{title}]"))
-    match (pos):
-        case 'center':
-            return f"{color(f'{before}┌{'─' * lgth}', DIM)}[{color(title, titleclr)}]{color(f"{'─' * lgth}»", DIM)}\n{color('└──', DIM)}{Fore.YELLOW}» "
-
-        case 'rigth':
-            return f"{color(f'{before}┌{'─' * (contentLen - 1)}', DIM)}[{color(title, titleclr)}]{color('─»', DIM)}\n{color('└──', DIM)}{Fore.YELLOW}» "
-
-        case 'left' | _:
-            return f"{color(f'{before}┌─', DIM)}[{color(title, titleclr)}]{color(f"{'─' * (contentLen - 1)}»", DIM)}\n{color('└──', DIM)}{Fore.YELLOW}» "
-
-    # end match
-
-# Main menu
-
 
 def main_menu():
     init()
@@ -454,7 +545,7 @@ def main_menu():
             banner()
             status = "Authenticated" if is_telethon_authenticated() else "Not Logged In"
             print(f"""{generate_box([f"Status: {color(status, GRN if status.lower().startswith('auth') else RED)}"], -1)}
-{generate_box([f"{color("1", YLW, f"{DIM}[STR{DIM}]{RST}")} New Ripper", f"{color("2", YLW, f"{DIM}[STR{DIM}]{RST}")} Saved Session", f"{color("3", YLW, f"{DIM}[STR{DIM}]{RST}")} Check Bot", f"{color("0", RED, f"{DIM}[STR{DIM}]{RST}")} Exit"], -1)}""")
+{generate_box([f"{color("1", YLW, f"{DIM}[STR{DIM}]{RST}")} New Ripper", f"{color("2", YLW, f"{DIM}[STR{DIM}]{RST}")} Saved Session", f"{color("3", YLW, f"{DIM}[STR{DIM}]{RST}")} Check Bot", f"{color("4", YLW, f"{DIM}[STR{DIM}]{RST}")} Check Bot Chat ID", f"{color("0", RED, f"{DIM}[STR{DIM}]{RST}")} Exit"], -1, title="Main Menus", titleclr=YLW)}""")
 
             choice = input(prompt('Select Menu'))
             if choice == "1":
@@ -463,6 +554,8 @@ def main_menu():
                 show_sessions()
             elif choice == "3":
                 checkbot()
+            elif choice == "4":
+                checkbot_chatid()
             elif choice == "0":
                 exit()
             else:
