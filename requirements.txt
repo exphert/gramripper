@@ -1,0 +1,5 @@
+requests
+telethon
+datetime
+colorama
+python-dotenv
