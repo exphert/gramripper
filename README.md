@@ -21,7 +21,7 @@ GramRipper is a Python-based tool designed to dump chat messages from Telegram b
 - **Bot Status Check**: Verifies if a bot is online and retrieves its information.
 - **User-Friendly Interface**: Provides a clear menu-driven interface for ease of use.
 - **Customizable**: Supports multiple sessions and allows starting from a specific message ID.
-- 
+
 ![screenshot](/img/poc.webp)
 
 ## Disclaimer (Legal & Ethical Use)
