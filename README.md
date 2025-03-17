@@ -14,7 +14,10 @@ GramRipper is a Python-based tool designed to dump chat messages from Telegram b
 <p align='center'>
 <a href="#features"><img src="https://img.shields.io/badge/features-2e3440?style=for-the-badge"/></a> <a href="#getting_started"><img src="https://img.shields.io/badge/Getting Started-2e3440?style=for-the-badge"/></a> <a href="#usage"><img src="https://img.shields.io/badge/Usage-2e3440?style=for-the-badge"/></a>
 </p>  
-      
+
+## Disclaimer (Legal & Ethical Use)
+This tool is intended for **educational and research purposes only**. The author is not responsible for any misuse of this tool. Use it at your own risk and ensure you have proper authorization before interacting with any Telegram bot or account. Unauthorized use of this tool may violate Telegram's terms of service and a
+
 ## Features <a name = "features"></a>
 - **Automated Message Forwarding**: Forwards messages from a target bot to your specified chat ID.
 - **Session Management**: Saves and resumes sessions for ongoing message dumping.
@@ -23,9 +26,6 @@ GramRipper is a Python-based tool designed to dump chat messages from Telegram b
 - **Customizable**: Supports multiple sessions and allows starting from a specific message ID.
 
 ![screenshot](/img/poc.webp)
-
-## Disclaimer (Legal & Ethical Use)
-This tool is intended for **educational and research purposes only**. The author is not responsible for any misuse of this tool. Use it at your own risk and ensure you have proper authorization before interacting with any Telegram bot or account. Unauthorized use of this tool may violate Telegram's terms of service and a
 
 ## Getting Started <a name = "getting_started"></a>
 Before using GramRipper, ensure you have the following:
