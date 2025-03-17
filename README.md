@@ -33,9 +33,12 @@ Before using GramRipper, ensure you have the following:
 ### Prerequisites
 1. **Python 3.x or higher** installed on your system.
 2. A **Telegram account** with a phone number for authentication.
-3. **API_ID** and **API_HASH** from [my.telegram.org](https://my.telegram.org/apps).
-4. A **Telegram bot token** (optional, if you want to interact with bots).
-5. A **chat ID** where forwarded messages will be sent.
+3. **API_ID** and **API_HASH**.
+  - Visit [my.telegram.org/apps](https://my.telegram.org/apps) and log in with your phone number.
+  - Create a new application and note the following:
+    - api_id
+    - api_hash
+5. A **Receiver Chat ID** where forwarded messages will be sent.
 
 ### Installation <a name = "installation"></a>
 1. Clone the repository:
@@ -55,7 +58,7 @@ $ pip install -r requirements.txt
 $ python GramRipper.py
 ```
   2. Follow the prompts to enter your:
-    - API_ID and API_HASH (obtained from my.telegram.org).
+    - API_ID and API_HASH (obtained from my.telegram.org/apps).
     - Receiver Chat ID (the chat ID where forwarded messages will be sent).
   3. Authenticate with your Telegram account:
     - Enter your phone number when prompted.
