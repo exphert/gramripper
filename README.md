@@ -53,21 +53,21 @@ $ pip install -r requirements.txt
 ```
 
 3. Setup (First-Time Setup):
-  1. Run the script:
+- Run the script:
 ```bash
 $ python GramRipper.py
 ```
-  2. Follow the prompts to enter your:
-    - API_ID and API_HASH (obtained from my.telegram.org/apps).
-    - Receiver Chat ID (the chat ID where forwarded messages will be sent).
-  3. Authenticate with your Telegram account:
-    - Enter your phone number when prompted.
-    - Provide the OTP code sent to your Telegram account.
-    - If 2FA is enabled, enter your 2FA password.
-  4. The script will generate the following files:
-    - .env: Stores your API_ID, API_HASH, and TO_CHAT_ID.
-    - src/ripper_session.session: Telethon session file for authentication.
-    - session/: Directory to store bot session data.
+- Follow the prompts to enter your:
+  - API_ID and API_HASH (obtained from my.telegram.org/apps).
+  - Receiver Chat ID (the chat ID where forwarded messages will be sent).
+- Authenticate with your Telegram account:
+  - Enter your phone number when prompted.
+  - Provide the OTP code sent to your Telegram account.
+  - If 2FA is enabled, enter your 2FA password.
+- The script will generate the following files:
+  - .env: Stores your API_ID, API_HASH, and TO_CHAT_ID.
+  - src/ripper_session.session: Telethon session file for authentication.
+  - session/: Directory to store bot session data.
 
 ## Usage <a name="usage"></a>
 1. Launch the script:
