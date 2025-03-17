@@ -6,7 +6,7 @@
 ---
 
 <p align="center"> 
-GramRipper is a Python-based tool designed to dump chat messages from Telegram bots using the forward method. It leverages the *Telegram Bot API* and *Telethon* to automate the process of capturing messages from malicious bots and forwarding them to your own Telegram account. This tool is particularly useful for analyzing or archiving bot interactions.
+GramRipper is a Python-based tool designed to dump chat messages from Telegram bots using the forward method. It leverages the <b>Telegram Bot API</b> and <b>Telethon</b> to automate the process of capturing messages from malicious bots and forwarding them to your own Telegram account. This tool is particularly useful for analyzing or archiving bot interactions.
     </br> </br> 
     <img src="https://img.shields.io/badge/Python-3.x-ebcb8b?style=flat-square"/>  <img src="https://img.shields.io/badge/LICENSE-MIT-blue?style=flat-square"/> <img src="https://img.shields.io/badge/VERSION-1.1-a3be8c?style=flat-square"/><br/>
 </p>
